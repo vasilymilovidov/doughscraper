@@ -11,6 +11,7 @@ type Styles struct {
 	InputField  lipgloss.Style
 }
 
+// DefaultStyles Default styles for the input fields
 func DefaultStyles() *Styles {
 	s := new(Styles)
 	s.BorderColor = "#cae797"
