@@ -120,6 +120,7 @@ func createJsonView(m model) string {
 			lipgloss.Left,
 			current.question,
 			m.styles.InputField.Render(current.input.View()),
+			lipgloss.JoinHorizontal(lipgloss.Bottom, subtle("Provide paths to the roots of your local and remote sample folders")),
 		),
 	)
 }
@@ -135,6 +136,7 @@ func renameView(m model) string {
 			lipgloss.Left,
 			current.question,
 			m.styles.InputField.Render(current.input.View()),
+			lipgloss.JoinHorizontal(lipgloss.Bottom, subtle("Provide the path to the folder with files to rename.")),
 		),
 	)
 }
