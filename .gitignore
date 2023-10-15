@@ -7,8 +7,6 @@
 *.dll
 *.so
 *.dylib
-pitchdetector
-doughscraper
 
 # Test binary, built with `go test -c`
 *.test
