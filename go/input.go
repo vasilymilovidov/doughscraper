@@ -61,7 +61,6 @@ func (a *Path) View() string {
 	return a.textinput.View()
 }
 
-//Digital representation of LocalFolderPath, WebFolderPath and LocalRootPath
 type LocalFolderPath struct {
 	*Path
 }

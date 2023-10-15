@@ -37,11 +37,11 @@ fn main() {
             let entry = entry.unwrap();
             let path = entry.path();
 
-            // Process only files (exclude directories).
+            // Exclude directories and process.
             if path.is_file() {
                 let old_name = path.file_name().ok_or("File name error").unwrap().to_string_lossy().to_string();
 
-                // Skip non-wave files.
+                // Skip non-wave or mp3 files.
                 if old_name.ends_with(".wav") || old_name.ends_with(".mp3") {
                     // Detect the pitch.
                     let pitch = note(path.clone());

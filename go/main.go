@@ -244,6 +244,7 @@ func updateRename(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// View for the "Detect pitch and rename" menu
 func PitchDetectAndRename(m model) string {
 	current := m.paths[3]
 	return lipgloss.Place(
@@ -260,6 +261,7 @@ func PitchDetectAndRename(m model) string {
 	)
 }
 
+// Update for the "Detect pitch and rename" menu
 func updatePitchDetectAndRename(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	current := &m.paths[3]
 	var cmd tea.Cmd

@@ -19,6 +19,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 	oneshotFolders := make(map[string][]string)
 	pitchedFolders := make(map[string]map[string]string)
 
+	// Walk the directory and add all files to the appropriate map
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -34,6 +35,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 			relativeDir, _ := filepath.Rel(directoryPath, dir)
 			file := info.Name()
 
+			// If the file is pitched, add it to the pitched folders map
 			if isPitched(file) {
 				if pitchedFolders[relativeDir] == nil {
 					pitchedFolders[relativeDir] = make(map[string]string)
@@ -42,6 +44,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 				pitchedFolders[relativeDir][strings.TrimSuffix(file, filepath.Ext(file))] = file
 
 			} else {
+				// Otherwise, add it to the oneshot folders map
 				oneshotFolders[relativeDir] = append(oneshotFolders[relativeDir], file)
 			}
 		}
@@ -58,6 +61,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 	fmt.Fprint(writer, "{\n")
 	fmt.Fprintf(writer, "  \"_base\": \"%s/\",\n", remoteDir)
 
+	// Sort the keys so that the output is deterministic
 	oneshotKeys := make([]string, len(oneshotFolders))
 	i := 0
 	for k := range oneshotFolders {
@@ -66,6 +70,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 	}
 	sort.Strings(oneshotKeys)
 
+	// Write the oneshot folders to the file
 	for j, folder := range oneshotKeys {
 		files := oneshotFolders[folder]
 		fmt.Fprintf(writer, "  \"%s\": [\n", folder)
@@ -83,6 +88,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 		fmt.Fprintf(writer, "  ]%s\n", separator)
 	}
 
+	// Sort the keys so that the output is deterministic
 	pitchedKeys := make([]string, len(pitchedFolders))
 	i = 0
 	for k := range pitchedFolders {
@@ -91,6 +97,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 	}
 	sort.Strings(pitchedKeys)
 
+	// Write the pitched folders to the file
 	for j, folder := range pitchedKeys {
 		files := pitchedFolders[folder]
 		fmt.Fprintf(writer, "  \"%s\": {\n", folder)
@@ -125,7 +132,7 @@ func processDirectory(directoryPath string, remoteDir string) (string, error) {
 	return builder.String(), nil
 }
 
-func GenerateJson(localDir string, remoteDir string) error { // returns an error
+func GenerateJson(localDir string, remoteDir string) error {
 	result, err := processDirectory(localDir, remoteDir)
 	if err != nil {
 		return fmt.Errorf("an error occurred while processing the directory: %w", err)
