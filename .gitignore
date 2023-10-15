@@ -16,6 +16,12 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+.idea/
+.vscode/
+target/
 
 # Go workspace file
 go.work
+
+.DS_Store
+
