@@ -2,6 +2,7 @@
 
 Doughscraper is a CLI tool for preparing samples for [`tidalcycles/strudel`](https://github.com/tidalcycles/strudel). 
 
+![doughscraper](https://github.com/vasilymilovidov/doughscraper/blob/main/doughscraper.png?raw=true)
 
 ### Usage
 Download the latest release for your OS from the release page and put `doughscraper` and `pitchdetector` binaries in your PATH.
