@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/indent"
@@ -11,7 +13,11 @@ import (
 type pitchDetectorFinishedMsg struct{err error}
 
 func PitchDetectAndRenameFiles(path string) tea.Cmd {
-	c := exec.Command("pitch_detector", path)
+	// pitchdetector, err := exec.LookPath("pitchdetector")
+	c := exec.Command("pitchdetector", path)
+	if errors.Is(c.Err, exec.ErrDot) {
+		c.Err = nil
+	}
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return pitchDetectorFinishedMsg{err}
 })
@@ -42,6 +48,7 @@ func main() {
 		newLocalFolder("Local folder path"),
 		newLocalRoot("Local root path"),
 		newRemoteFolder("Remote root folder path"),
+		newLocalFolder("Local folder path"),
 	}
 	styles := DefaultStyles()
 	initialModel := model{
@@ -238,7 +245,7 @@ func updateRename(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 }
 
 func PitchDetectAndRename(m model) string {
-	current := m.paths[0]
+	current := m.paths[3]
 	return lipgloss.Place(
 		m.width,
 		m.height,
@@ -254,7 +261,7 @@ func PitchDetectAndRename(m model) string {
 }
 
 func updatePitchDetectAndRename(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
-	current := &m.paths[0]
+	current := &m.paths[3]
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -314,7 +321,7 @@ func updateCreateJson(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "enter":
 			current.answer = current.input.Value()
-			if m.index == len(m.paths)-1 {
+			if m.index == len(m.paths)-2 {
 				err := GenerateJson(m.paths[1].answer, m.paths[2].answer)
 				if err != nil {
 					fmt.Printf("Error: %s", err.Error())
@@ -323,7 +330,8 @@ func updateCreateJson(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				m.doneMessage = fmt.Sprintf("Generated JSON in %s", m.paths[1].answer)
 				m.CreateJsonMenu = false
 			}
-			m.Next()
+				m.Next()
+			
 			return m, current.input.Blur()
 		}
 	}

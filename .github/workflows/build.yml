@@ -1,0 +1,92 @@
+name: Release Binaries
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            rust_target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            rust_target: x86_64-pc-windows-msvc
+          - os: macOS-latest
+            goos: darwin
+            goarch: amd64
+            rust_target: x86_64-apple-darwin
+          - os: macOS-latest
+            goos: darwin
+            goarch: arm64
+            rust_target: aarch64-apple-darwin
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.20
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.rust_target }}
+          override: true
+
+      - name: Run Makefile
+        env:
+          GO111MODULE: on
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          TARGET: ${{ matrix.rust_target }}
+          EXTENSION: ${{ matrix.goos == 'windows' && '.exe' || '' }}
+        run: make -f Makefile.ci all
+
+      - name: Archive executables
+        shell: bash
+        run: |
+          if [[ "${{ matrix.goos }}" ==  "windows" ]]; then 
+          7z a doughscraper_${{ matrix.goos }}_${{ matrix.goarch }}.zip doughscraper.exe
+          7z a pitchdetector_${{ matrix.goos }}_${{ matrix.goarch }}.zip pitchdetector.exe
+          else
+          tar czvf doughscraper_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz doughscraper
+          tar czvf pitchdetector_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz pitchdetector
+          fi
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            doughscraper_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz
+            pitchdetector_${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+
+      - name: Upload Release Asset (doughscraper)
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./doughscraper_${{ matrix.goos }}_${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
+          asset_name: doughscraper_${{ matrix.goos }}_${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
+          asset_content_type: application/gzip
+
+      - name: Upload Release Asset (pitchdetector)
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./pitchdetector_${{ matrix.goos }}_${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
+          asset_name: pitchdetector_${{ matrix.goos }}_${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
+          asset_content_type: application/gzip

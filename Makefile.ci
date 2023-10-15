@@ -1,0 +1,16 @@
+.PHONY: build_go build_rust install
+
+BINARY_GO := doughscraper
+BINARY_RUST := pitchdetector
+
+build_go:
+	@echo "Building Go binary"
+	cd go && GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ../$(BINARY_GO)$(EXTENSION)
+
+build_rust:
+	@echo "Building Rust binary"
+	cd rust/pitchdetector && cargo build --release --target $(TARGET)
+	cp rust/pitchdetector/target/$(TARGET)/release/$(BINARY_RUST)$(EXTENSION) $(BINARY_RUST)$(EXTENSION)
+
+
+all: build_go build_rust
